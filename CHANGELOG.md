@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.3.2...3.x)
+## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.4.0...3.x)
+
+## [v3.4.0](https://github.com/laravel/slack-notification-channel/compare/v3.3.2...v3.4.0) - 2024-10-24
+
+* Add support for using copied json from block kit builder by [@princejohnsantillan](https://github.com/princejohnsantillan) in https://github.com/laravel/slack-notification-channel/pull/98
 
 ## [v3.3.2](https://github.com/laravel/slack-notification-channel/compare/v3.3.1...v3.3.2) - 2024-09-04
 
