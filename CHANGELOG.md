@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.4.0...3.x)
+## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.4.1...3.x)
+
+## [v3.4.1](https://github.com/laravel/slack-notification-channel/compare/v3.4.0...v3.4.1) - 2024-11-21
+
+* [3.x] Supports PHP 8.4 by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/slack-notification-channel/pull/99
 
 ## [v3.4.0](https://github.com/laravel/slack-notification-channel/compare/v3.3.2...v3.4.0) - 2024-10-24
 
