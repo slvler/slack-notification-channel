@@ -573,4 +573,31 @@ class SlackMessageTest extends TestCase
             ],
         ]);
     }
+
+    /** @test */
+    public function it_can_return_an_block_kit_builder_url()
+    {
+        $message = (new SlackChannelTestNotification(function (SlackMessage $message) {
+            $message
+                ->username('larabot')
+                ->to('#ghost-talk')
+                ->headerBlock('Budget Performance')
+                ->sectionBlock(function (SectionBlock $sectionBlock) {
+                    $sectionBlock->text('A message *with some bold text* and _some italicized text_.')->markdown();
+                });
+        }))->toSlack(
+            new SlackChannelTestNotifiable(new SlackRoute('#ghost-talk', 'fake-token'))
+        );
+
+        $returnedUrl = $message->toBlockKitBuilderUrl();
+        $expectedUrl = 'https://app.slack.com/block-kit-builder#'
+            .rawurlencode('{"blocks":[{"type":"header","text":{"type":"plain_text","text":"Budget Performance"}},{"type":"section","text":{"type":"mrkdwn","text":"A message *with some bold text* and _some italicized text_."}}]}');
+
+        $this->assertStringNotContainsStringIgnoringCase('username', $returnedUrl);
+        $this->assertStringNotContainsStringIgnoringCase('larabot', $returnedUrl);
+        $this->assertStringNotContainsStringIgnoringCase('channel', $returnedUrl);
+        $this->assertStringNotContainsStringIgnoringCase('#ghost-talk', $returnedUrl);
+
+        $this->assertEquals($expectedUrl, $returnedUrl);
+    }
 }
