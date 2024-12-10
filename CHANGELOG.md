@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.4.1...3.x)
+## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.4.2...3.x)
+
+## [v3.4.2](https://github.com/laravel/slack-notification-channel/compare/v3.4.1...v3.4.2) - 2024-11-29
+
+* [3.x] Add the ability to get the Block Kit Builder url from a SlackMessage by [@Mahoke](https://github.com/Mahoke) in https://github.com/laravel/slack-notification-channel/pull/100
 
 ## [v3.4.1](https://github.com/laravel/slack-notification-channel/compare/v3.4.0...v3.4.1) - 2024-11-21
 
