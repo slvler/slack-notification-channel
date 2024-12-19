@@ -1,6 +1,41 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.1.0...3.x)
+## [Unreleased](https://github.com/laravel/slack-notification-channel/compare/v3.4.2...3.x)
+
+## [v3.4.2](https://github.com/laravel/slack-notification-channel/compare/v3.4.1...v3.4.2) - 2024-11-29
+
+* [3.x] Add the ability to get the Block Kit Builder url from a SlackMessage by [@Mahoke](https://github.com/Mahoke) in https://github.com/laravel/slack-notification-channel/pull/100
+
+## [v3.4.1](https://github.com/laravel/slack-notification-channel/compare/v3.4.0...v3.4.1) - 2024-11-21
+
+* [3.x] Supports PHP 8.4 by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/slack-notification-channel/pull/99
+
+## [v3.4.0](https://github.com/laravel/slack-notification-channel/compare/v3.3.2...v3.4.0) - 2024-10-24
+
+* Add support for using copied json from block kit builder by [@princejohnsantillan](https://github.com/princejohnsantillan) in https://github.com/laravel/slack-notification-channel/pull/98
+
+## [v3.3.2](https://github.com/laravel/slack-notification-channel/compare/v3.3.1...v3.3.2) - 2024-09-04
+
+* Revert "fix: do not notify when route is empty" by [@driesvints](https://github.com/driesvints) in https://github.com/laravel/slack-notification-channel/pull/97
+
+## [v3.3.1](https://github.com/laravel/slack-notification-channel/compare/v3.3.0...v3.3.1) - 2024-08-17
+
+* fix: do not notify when route is empty by [@TomaszOnePilot](https://github.com/TomaszOnePilot) in https://github.com/laravel/slack-notification-channel/pull/96
+
+## [v3.3.0](https://github.com/laravel/slack-notification-channel/compare/v3.2.0...v3.3.0) - 2024-07-10
+
+* Use new static analysis workflow by [@Jubeki](https://github.com/Jubeki) in https://github.com/laravel/slack-notification-channel/pull/89
+* feat: support threaded replies for SlackMessage by [@Ma-ve](https://github.com/Ma-ve) in https://github.com/laravel/slack-notification-channel/pull/94
+
+## [v3.2.0](https://github.com/laravel/slack-notification-channel/compare/v3.1.1...v3.2.0) - 2024-01-15
+
+* [3.x] Merge develop by [@nunomaduro](https://github.com/nunomaduro) in https://github.com/laravel/slack-notification-channel/pull/88
+
+## [v3.1.1](https://github.com/laravel/slack-notification-channel/compare/v3.1.0...v3.1.1) - 2024-01-06
+
+* constructor method parameter declaration by [@slvler](https://github.com/slvler) in https://github.com/laravel/slack-notification-channel/pull/80
+* constructor method parameter declaration by [@slvler](https://github.com/slvler) in https://github.com/laravel/slack-notification-channel/pull/82
+* Support disabling slack route dynamically when using `SlackWebhookChannel` by [@marijoo](https://github.com/marijoo) in https://github.com/laravel/slack-notification-channel/pull/87
 
 ## [v3.1.0](https://github.com/laravel/slack-notification-channel/compare/v3.0.1...v3.1.0) - 2023-10-30
 

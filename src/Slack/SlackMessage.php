@@ -13,6 +13,7 @@ use Illuminate\Notifications\Slack\BlockKit\Blocks\SectionBlock;
 use Illuminate\Notifications\Slack\Contracts\BlockContract;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Traits\Conditionable;
+use JsonException;
 use LogicException;
 
 class SlackMessage implements Arrayable
@@ -32,7 +33,7 @@ class SlackMessage implements Arrayable
     /**
      * The message's blocks.
      *
-     * @var \Illuminate\Notifications\Slack\Contracts\BlockContract[]
+     * @var array<\Illuminate\Notifications\Slack\Contracts\BlockContract|array<mixed>>
      */
     protected array $blocks = [];
 
@@ -70,6 +71,16 @@ class SlackMessage implements Arrayable
      * The username to send the message as.
      */
     protected ?string $username = null;
+
+    /**
+     * Unique, per-channel, timestamp for each message. If provided, send message as a thread reply to this message.
+     */
+    protected ?string $threadTs = null;
+
+    /**
+     * If sending message as reply to thread, whether to 'broadcast' a reference to the thread reply to the parent conversation.
+     */
+    protected ?bool $broadcastReply = null;
 
     /**
      * Set the Slack channel the message should be sent to.
@@ -239,6 +250,45 @@ class SlackMessage implements Arrayable
     }
 
     /**
+     * Set the thread timestamp (message ID) to send as reply to thread.
+     */
+    public function threadTimestamp(?string $threadTimestamp): self
+    {
+        $this->threadTs = $threadTimestamp;
+
+        return $this;
+    }
+
+    /**
+     * Only applicable if threadTimestamp is set. Broadcasts a reference to the threaded reply to the parent conversation.
+     */
+    public function broadcastReply(?bool $broadcastReply = true): self
+    {
+        $this->broadcastReply = $broadcastReply;
+
+        return $this;
+    }
+
+    /**
+     * Specify a raw Block Kit Builder JSON payload for the message.
+     *
+     * @throws JsonException
+     * @throws LogicException
+     */
+    public function usingBlockKitTemplate(string $template): self
+    {
+        $blocks = json_decode($template, true, flags: JSON_THROW_ON_ERROR);
+
+        if (! array_key_exists('blocks', $blocks)) {
+            throw new LogicException('The blocks array key is missing.');
+        }
+
+        array_push($this->blocks, ...$blocks['blocks']);
+
+        return $this;
+    }
+
+    /**
      * Get the instance as an array.
      */
     public function toArray(): array
@@ -253,11 +303,13 @@ class SlackMessage implements Arrayable
 
         $optionalFields = array_filter([
             'text' => $this->text,
-            'blocks' => ! empty($this->blocks) ? array_map(fn (BlockContract $block) => $block->toArray(), $this->blocks) : null,
+            'blocks' => ! empty($this->blocks) ? array_map(fn ($block) => $block instanceof BlockContract ? $block->toArray() : $block, $this->blocks) : null,
             'icon_emoji' => $this->icon,
             'icon_url' => $this->image,
             'metadata' => $this->metaData?->toArray(),
             'mrkdwn' => $this->mrkdwn,
+            'thread_ts' => $this->threadTs,
+            'reply_broadcast' => $this->broadcastReply,
             'unfurl_links' => $this->unfurlLinks,
             'unfurl_media' => $this->unfurlMedia,
             'username' => $this->username,
@@ -266,6 +318,16 @@ class SlackMessage implements Arrayable
         return array_merge([
             'channel' => $this->channel,
         ], $optionalFields);
+    }
+
+    /**
+     * Get the Block Kit URL for the message.
+     *
+     * @return string
+     */
+    public function toBlockKitBuilderUrl(): string
+    {
+        return 'https://app.slack.com/block-kit-builder#'.rawurlencode(json_encode(Arr::except($this->toArray(), ['username', 'text', 'channel']), true));
     }
 
     /**
@@ -279,6 +341,6 @@ class SlackMessage implements Arrayable
             dd($this->toArray());
         }
 
-        dd('https://app.slack.com/block-kit-builder#'.rawurlencode(json_encode(Arr::except($this->toArray(), ['username', 'text', 'channel']), true)));
+        dd($this->toBlockKitBuilderUrl());
     }
 }

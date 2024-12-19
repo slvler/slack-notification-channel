@@ -188,6 +188,32 @@ class SlackMessageTest extends TestCase
     }
 
     /** @test */
+    public function it_can_reply_as_thread(): void
+    {
+        $this->sendNotification(function (SlackMessage $message) {
+            $message->text('See https://api.slack.com/methods/chat.postMessage for more information.');
+            $message->threadTimestamp('123456.7890');
+        })->assertNotificationSent([
+            'channel' => '#ghost-talk',
+            'text' => 'See https://api.slack.com/methods/chat.postMessage for more information.',
+            'thread_ts' => '123456.7890',
+        ]);
+    }
+
+    /** @test */
+    public function it_can_send_threaded_reply_as_broadcast_reference(): void
+    {
+        $this->sendNotification(function (SlackMessage $message) {
+            $message->text('See https://api.slack.com/methods/chat.postMessage for more information.');
+            $message->broadcastReply(true);
+        })->assertNotificationSent([
+            'channel' => '#ghost-talk',
+            'text' => 'See https://api.slack.com/methods/chat.postMessage for more information.',
+            'reply_broadcast' => true,
+        ]);
+    }
+
+    /** @test */
     public function it_can_set_the_bot_user_name(): void
     {
         $this->sendNotification(function (SlackMessage $message) {
@@ -420,5 +446,158 @@ class SlackMessageTest extends TestCase
                 ],
             ],
         ]);
+    }
+
+    /** @test */
+    public function it_can_use_copied_block_kit_template()
+    {
+        $this->sendNotification(function (SlackMessage $message) {
+            $message->usingBlockKitTemplate(<<<'JSON'
+                {
+                    "blocks": [
+                        {
+                            "type": "header",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "This is a header block",
+                                "emoji": true
+                            }
+                        },
+                        {
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "image",
+                                    "image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+                                    "alt_text": "cute cat"
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": "*Cat* has approved this message."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "image",
+                            "image_url": "https://assets3.thrillist.com/v1/image/1682388/size/tl-horizontal_main.jpg",
+                            "alt_text": "delicious tacos"
+                        }
+                    ]
+                }
+            JSON);
+        })->assertNotificationSent([
+            'channel' => '#ghost-talk',
+            'blocks' => [
+                [
+                    'type' => 'header',
+                    'text' => [
+                        'type' => 'plain_text',
+                        'text' => 'This is a header block',
+                        'emoji' => true,
+                    ],
+                ],
+                [
+                    'type' => 'context',
+                    'elements' => [
+                        [
+                            'type' => 'image',
+                            'image_url' => 'https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg',
+                            'alt_text' => 'cute cat',
+                        ],
+                        [
+                            'type' => 'mrkdwn',
+                            'text' => '*Cat* has approved this message.',
+                        ],
+                    ],
+                ],
+                [
+                    'type' => 'image',
+                    'image_url' => 'https://assets3.thrillist.com/v1/image/1682388/size/tl-horizontal_main.jpg',
+                    'alt_text' => 'delicious tacos',
+                ],
+            ],
+        ]);
+    }
+
+    /** @test */
+    public function it_can_combined_block_kit_template_and_block_contract_in_order()
+    {
+        $this->sendNotification(function (SlackMessage $message) {
+            $message->usingBlockKitTemplate(<<<'JSON'
+                {
+                    "blocks": [
+                        {
+                            "type": "header",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "This is a header block",
+                                "emoji": true
+                            }
+                        }
+                    ]
+                }
+            JSON);
+
+            $message->dividerBlock();
+
+            $message->usingBlockKitTemplate(<<<'JSON'
+                {
+                    "blocks": [
+                        {
+                            "type": "image",
+                            "image_url": "https://assets3.thrillist.com/v1/image/1682388/size/tl-horizontal_main.jpg",
+                            "alt_text": "delicious tacos"
+                        }
+                    ]
+                }
+            JSON);
+        })->assertNotificationSent([
+            'channel' => '#ghost-talk',
+            'blocks' => [
+                [
+                    'type' => 'header',
+                    'text' => [
+                        'type' => 'plain_text',
+                        'text' => 'This is a header block',
+                        'emoji' => true,
+                    ],
+                ],
+                [
+                    'type' => 'divider',
+                ],
+                [
+                    'type' => 'image',
+                    'image_url' => 'https://assets3.thrillist.com/v1/image/1682388/size/tl-horizontal_main.jpg',
+                    'alt_text' => 'delicious tacos',
+                ],
+            ],
+        ]);
+    }
+
+    /** @test */
+    public function it_can_return_an_block_kit_builder_url()
+    {
+        $message = (new SlackChannelTestNotification(function (SlackMessage $message) {
+            $message
+                ->username('larabot')
+                ->to('#ghost-talk')
+                ->headerBlock('Budget Performance')
+                ->sectionBlock(function (SectionBlock $sectionBlock) {
+                    $sectionBlock->text('A message *with some bold text* and _some italicized text_.')->markdown();
+                });
+        }))->toSlack(
+            new SlackChannelTestNotifiable(new SlackRoute('#ghost-talk', 'fake-token'))
+        );
+
+        $returnedUrl = $message->toBlockKitBuilderUrl();
+        $expectedUrl = 'https://app.slack.com/block-kit-builder#'
+            .rawurlencode('{"blocks":[{"type":"header","text":{"type":"plain_text","text":"Budget Performance"}},{"type":"section","text":{"type":"mrkdwn","text":"A message *with some bold text* and _some italicized text_."}}]}');
+
+        $this->assertStringNotContainsStringIgnoringCase('username', $returnedUrl);
+        $this->assertStringNotContainsStringIgnoringCase('larabot', $returnedUrl);
+        $this->assertStringNotContainsStringIgnoringCase('channel', $returnedUrl);
+        $this->assertStringNotContainsStringIgnoringCase('#ghost-talk', $returnedUrl);
+
+        $this->assertEquals($expectedUrl, $returnedUrl);
     }
 }
